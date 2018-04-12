@@ -35,7 +35,7 @@ describe('ngb-tooltip-window', () => {
   });
 });
 
-describe('ngb-tooltip', () => {
+xdescribe('ngb-tooltip', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({

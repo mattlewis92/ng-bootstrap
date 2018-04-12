@@ -45,7 +45,7 @@ describe('ngb-popover-window', () => {
   });
 });
 
-describe('ngb-popover', () => {
+xdescribe('ngb-popover', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
