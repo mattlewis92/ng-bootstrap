@@ -7,7 +7,7 @@ import {AnimationsHelper} from '../util/animations-helper';
   selector: 'ngb-modal-backdrop',
   template: '',
   host: {
-    'class': '"modal-backdrop fade show" + (backdropClass ? " " + backdropClass : "")',
+    '[class]': '"modal-backdrop fade show" + (backdropClass ? " " + backdropClass : "")',
     '[@modalBackdrop]': 'animationsHelper.state',
     '(@modalBackdrop.done)': 'animationsHelper.stateChanges.next($event)'
   },
