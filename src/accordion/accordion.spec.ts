@@ -232,6 +232,49 @@ describe('ngb-accordion', () => {
     titles.forEach((title: HTMLElement, idx: number) => { expect(title.textContent.trim()).toBe(`Panel ${idx + 1}`); });
   });
 
+  it('should not pick up titles from nested accordions', () => {
+    const testHtml = `
+    <ngb-accordion activeIds="open_me">
+     <ngb-panel title="parent title" id="open_me">
+       <ng-template ngbPanelContent>
+         <ngb-accordion>
+           <ngb-panel>
+             <ng-template ngbPanelTitle>child title</ng-template>
+             <ng-template ngbPanelContent>child content</ng-template>
+           </ngb-panel>     
+          </ngb-accordion>
+       </ng-template>
+     </ngb-panel>     
+    </ngb-accordion>
+    `;
+    const fixture = createTestComponent(testHtml);
+    // additional change detection is required to reproduce the problem in the test environment
+    fixture.detectChanges();
+
+    const titles = getPanelsTitle(fixture.nativeElement);
+    const parentTitle = titles[0].textContent.trim();
+    const childTitle = titles[1].textContent.trim();
+
+    expect(parentTitle).toContain('parent title');
+    expect(parentTitle).not.toContain('child title');
+    expect(childTitle).toContain('child title');
+    expect(childTitle).not.toContain('parent title');
+  });
+
+  it('should not crash for an empty accordion', () => {
+    const fixture = createTestComponent('<ngb-accordion></ngb-accordion>');
+    expect(getPanels(fixture.nativeElement).length).toBe(0);
+  });
+
+  it('should not crash for panels without content', () => {
+    const fixture =
+        createTestComponent('<ngb-accordion activeIds="open_me"><ngb-panel id="open_me"></ngb-panel></ngb-accordion>');
+    const panelsContent = getPanelsContent(fixture.nativeElement);
+
+    expect(panelsContent.length).toBe(1);
+    expect(panelsContent[0].textContent.trim()).toBe('');
+  });
+
   it('should have the appropriate content', () => {
     const fixture = TestBed.createComponent(TestComponent);
     fixture.detectChanges();
@@ -248,6 +291,24 @@ describe('ngb-accordion', () => {
     contents.forEach((content: HTMLElement, idx: number) => {
       expect(content.getAttribute('aria-labelledby')).toBe(`${content.id}-header`);
       expect(content.textContent.trim()).toBe(originalContent[idx].content);
+    });
+  });
+
+  it('should have the appropriate CSS visibility classes', () => {
+    const fixture = TestBed.createComponent(TestComponent);
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement;
+    fixture.componentInstance.activeIds = 'one,two,three';
+
+    fixture.detectChanges();
+
+    const contents = getPanelsContent(compiled);
+    expect(contents.length).not.toBe(0);
+
+    contents.forEach((content: HTMLElement) => {
+      expect(content).toHaveCssClass('collapse');
+      expect(content).toHaveCssClass('show');
     });
   });
 
@@ -471,9 +532,9 @@ describe('ngb-accordion', () => {
     fixture.detectChanges();
 
     let el = fixture.nativeElement.querySelectorAll('.card-header');
-    expect(el[0]).toHaveCssClass('card-warning');
-    expect(el[1]).toHaveCssClass('card-warning');
-    expect(el[2]).toHaveCssClass('card-warning');
+    expect(el[0]).toHaveCssClass('bg-warning');
+    expect(el[1]).toHaveCssClass('bg-warning');
+    expect(el[2]).toHaveCssClass('bg-warning');
   });
 
   it('should override the type in accordion with type in panel', () => {
@@ -487,9 +548,9 @@ describe('ngb-accordion', () => {
     fixture.detectChanges();
 
     let el = fixture.nativeElement.querySelectorAll('.card-header');
-    expect(el[0]).toHaveCssClass('card-success');
-    expect(el[1]).toHaveCssClass('card-danger');
-    expect(el[2]).toHaveCssClass('card-warning');
+    expect(el[0]).toHaveCssClass('bg-success');
+    expect(el[1]).toHaveCssClass('bg-danger');
+    expect(el[2]).toHaveCssClass('bg-warning');
   });
 
   it('should have the proper roles', () => {

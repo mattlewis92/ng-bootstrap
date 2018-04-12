@@ -34,23 +34,46 @@ export class NgbDropdownMenu {
 
   applyPlacement(_placement: Placement) {
     // remove the current placement classes
-    this._renderer.removeClass(this._elementRef.nativeElement.parentElement, 'dropup');
-    this._renderer.removeClass(this._elementRef.nativeElement.parentElement, 'dropdown');
+    this._renderer.removeClass(this._elementRef.nativeElement.parentNode, 'dropup');
+    this._renderer.removeClass(this._elementRef.nativeElement.parentNode, 'dropdown');
     this.placement = _placement;
     /**
      * apply the new placement
      * in case of top use up-arrow or down-arrow otherwise
      */
     if (_placement.search('^top') !== -1) {
-      this._renderer.addClass(this._elementRef.nativeElement.parentElement, 'dropup');
+      this._renderer.addClass(this._elementRef.nativeElement.parentNode, 'dropup');
     } else {
-      this._renderer.addClass(this._elementRef.nativeElement.parentElement, 'dropdown');
+      this._renderer.addClass(this._elementRef.nativeElement.parentNode, 'dropdown');
     }
   }
 }
 
 /**
- * Allows the dropdown to be toggled via click. This directive is optional.
+ * Marks an element to which dropdown menu will be anchored. This is a simple version
+ * of the NgbDropdownToggle directive. It plays the same role as NgbDropdownToggle but
+ * doesn't listen to click events to toggle dropdown menu thus enabling support for
+ * events other than click.
+ *
+ * @since 1.1.0
+ */
+@Directive({
+  selector: '[ngbDropdownAnchor]',
+  host: {'class': 'dropdown-toggle', 'aria-haspopup': 'true', '[attr.aria-expanded]': 'dropdown.isOpen()'}
+})
+export class NgbDropdownAnchor {
+  anchorEl;
+
+  constructor(@Inject(forwardRef(() => NgbDropdown)) public dropdown, private _elementRef: ElementRef) {
+    this.anchorEl = _elementRef.nativeElement;
+  }
+
+  isEventFrom($event) { return this._elementRef.nativeElement.contains($event.target); }
+}
+
+/**
+ * Allows the dropdown to be toggled via click. This directive is optional: you can use NgbDropdownAnchor as an
+ * alternative.
  */
 @Directive({
   selector: '[ngbDropdownToggle]',
@@ -59,18 +82,13 @@ export class NgbDropdownMenu {
     'aria-haspopup': 'true',
     '[attr.aria-expanded]': 'dropdown.isOpen()',
     '(click)': 'toggleOpen()'
-  }
+  },
+  providers: [{provide: NgbDropdownAnchor, useExisting: forwardRef(() => NgbDropdownToggle)}]
 })
-export class NgbDropdownToggle {
-  anchorEl;
-
-  constructor(@Inject(forwardRef(() => NgbDropdown)) public dropdown, private _elementRef: ElementRef) {
-    this.anchorEl = _elementRef.nativeElement;
-  }
+export class NgbDropdownToggle extends NgbDropdownAnchor {
+  constructor(@Inject(forwardRef(() => NgbDropdown)) dropdown, elementRef: ElementRef) { super(dropdown, elementRef); }
 
   toggleOpen() { this.dropdown.toggle(); }
-
-  isEventFrom($event) { return this._elementRef.nativeElement.contains($event.target); }
 }
 
 /**
@@ -90,7 +108,7 @@ export class NgbDropdown implements OnInit {
 
   @ContentChild(NgbDropdownMenu) private _menu: NgbDropdownMenu;
 
-  @ContentChild(NgbDropdownToggle) private _toggle: NgbDropdownToggle;
+  @ContentChild(NgbDropdownAnchor) private _anchor: NgbDropdownAnchor;
 
   /**
    * Indicates that dropdown should be closed when selecting one of dropdown items (click) or pressing ESC.
@@ -189,13 +207,13 @@ export class NgbDropdown implements OnInit {
 
   ngOnDestroy() { this._zoneSubscription.unsubscribe(); }
 
-  private _isEventFromToggle($event) { return this._toggle ? this._toggle.isEventFrom($event) : false; }
+  private _isEventFromToggle($event) { return this._anchor.isEventFrom($event); }
 
   private _isEventFromMenu($event) { return this._menu ? this._menu.isEventFrom($event) : false; }
 
   private _positionMenu() {
-    if (this.isOpen() && this._menu && this._toggle) {
-      this._menu.position(this._toggle.anchorEl, this.placement);
+    if (this.isOpen() && this._menu) {
+      this._menu.position(this._anchor.anchorEl, this.placement);
     }
   }
 }

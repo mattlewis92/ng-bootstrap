@@ -27,11 +27,11 @@ const after = (one: NgbDateStruct, two: NgbDateStruct) =>
       background-color: #e6e6e6;
     }
     .custom-day.range, .custom-day:hover {
-      background-color: #0275d8;
+      background-color: rgb(2, 117, 216);
       color: white;
     }
-    .faded {
-      opacity: 0.5;
+    .custom-day.faded {
+      background-color: rgba(2, 117, 216, 0.5);
     }
   `]
 })
@@ -47,7 +47,7 @@ export class NgbdDatepickerRange {
     this.toDate = calendar.getNext(calendar.getToday(), 'd', 10);
   }
 
-  onDateChange(date: NgbDateStruct) {
+  onDateSelection(date: NgbDateStruct) {
     if (!this.fromDate && !this.toDate) {
       this.fromDate = date;
     } else if (this.fromDate && !this.toDate && after(date, this.fromDate)) {

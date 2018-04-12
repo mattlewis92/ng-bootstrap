@@ -10,6 +10,24 @@
   height: 256px;
 }
 
+.deprecated {
+  h3 {
+    text-decoration: line-through;
+  }
+
+  h5 {
+    display: inline-block;
+  }
+
+  td.label-cell code, p.signature, code.selector, code.export-as {
+    text-decoration: line-through;
+  }
+
+  .description, .meta, .lead {
+    opacity: 0.5;
+  }
+}
+
 .bd-masthead, .jumbotron {
   background-color: #0143A3;
   background: linear-gradient(135deg, #0143A3, #0273D4);
@@ -178,12 +196,13 @@ div.component-demo {
   h2 {
     margin-bottom: 1rem;
 
-    .plunker {
+    .plunker, .stackblitz {
+      text-decoration: none;
       opacity: 0.3;
       transition: opacity .5s;
     }
     &:hover {
-      .plunker {
+      .plunker, .stackblitz {
         opacity: 1;
       }
     }
@@ -309,4 +328,39 @@ ngbd-component-wrapper, ngbd-page-wrapper {
 
 @media (max-width: 568px) and (max-height: 320px)  {
   @include center-nav-tab-on-small-screens();
+}
+
+// Right-To-Left layout for the Islamic Calendars
+ngb-datepicker.rtl {
+	direction: rtl;
+}
+
+ngb-datepicker.rtl ngb-datepicker-navigation-select select.custom-select {
+  background-position: left 0.25rem center;
+}
+// Useful to modify this to flex-start for multiple calendar only
+ngb-datepicker.rtl .ngb-dp-arrow.right {
+  justify-content: center;
+}
+// Useful to modify this to flex-end for multiple calendar only
+ngb-datepicker.rtl .ngb-dp-arrow {
+  justify-content: center;
+}
+
+ngb-datepicker.rtl .ngb-dp-arrow-btn {
+  padding: 0;
+}
+
+ngb-datepicker.rtl .ngb-dp-arrow.right .ngb-dp-navigation-chevron:before {
+  transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+  -ms-transform: rotate(-135deg);
+  margin: 0 0 0 0.5rem;
+}
+
+ngb-datepicker.rtl .ngb-dp-navigation-chevron::before {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  margin: 0 0.5rem 0 0;
 }

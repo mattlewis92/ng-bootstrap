@@ -20,7 +20,7 @@ export interface ResultTemplateContext {
 @Component({
   selector: 'ngb-typeahead-window',
   exportAs: 'ngbTypeaheadWindow',
-  host: {'class': 'dropdown-menu', 'style': 'display: block', 'role': 'listbox', '[id]': 'id'},
+  host: {'class': 'dropdown-menu show', 'role': 'listbox', '[id]': 'id'},
   template: `
     <ng-template #rt let-result="result" let-term="term" let-formatter="formatter">
       <ngb-highlight [result]="formatter(result)" [term]="term"></ngb-highlight>
@@ -78,6 +78,8 @@ export class NgbTypeaheadWindow implements OnInit {
   @Output('select') selectEvent = new EventEmitter();
 
   @Output('activeChange') activeChangeEvent = new EventEmitter();
+
+  hasActive() { return this.activeIdx > -1 && this.activeIdx < this.results.length; }
 
   getActive() { return this.results[this.activeIdx]; }
 

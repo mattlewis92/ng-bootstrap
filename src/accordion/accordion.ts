@@ -1,7 +1,6 @@
 import {
   AfterContentChecked,
   Component,
-  ContentChild,
   ContentChildren,
   Directive,
   EventEmitter,
@@ -38,7 +37,7 @@ export class NgbPanelContent {
  * content
  */
 @Directive({selector: 'ngb-panel'})
-export class NgbPanel {
+export class NgbPanel implements AfterContentChecked {
   /**
    *  A flag determining whether the panel is disabled or not.
    *  When disabled, the panel cannot be toggled.
@@ -63,12 +62,25 @@ export class NgbPanel {
 
   /**
    *  Accordion's types of panels to be applied per panel basis.
-   *  Bootstrap 4 recognizes the following types: "success", "info", "warning" and "danger".
+   *  Bootstrap recognizes the following types: "primary", "secondary", "success", "danger", "warning", "info", "light"
+   * and "dark"
    */
   @Input() type: string;
 
-  @ContentChild(NgbPanelContent) contentTpl: NgbPanelContent;
-  @ContentChild(NgbPanelTitle) titleTpl: NgbPanelTitle;
+  titleTpl: NgbPanelTitle | null;
+  contentTpl: NgbPanelContent | null;
+
+  @ContentChildren(NgbPanelTitle, {descendants: false}) titleTpls: QueryList<NgbPanelTitle>;
+  @ContentChildren(NgbPanelContent, {descendants: false}) contentTpls: QueryList<NgbPanelContent>;
+
+  ngAfterContentChecked() {
+    // We are using @ContentChildren instead of @ContantChild as in the Angular version being used
+    // only @ContentChildren allows us to specify the {descendants: false} option.
+    // Without {descendants: false} we are hitting bugs described in:
+    // https://github.com/ng-bootstrap/ng-bootstrap/issues/2240
+    this.titleTpl = this.titleTpls.first;
+    this.contentTpl = this.contentTpls.first;
+  }
 }
 
 /**
@@ -103,16 +115,16 @@ export interface NgbPanelChangeEvent {
     <ng-template ngFor let-panel [ngForOf]="panels">
       <div class="card">
         <div role="tab" id="{{panel.id}}-header"
-          [class]="'card-header ' + (panel.type ? 'card-'+panel.type: type ? 'card-'+type : '')" [class.active]="panel.isOpen">
+          [class]="'card-header ' + (panel.type ? 'bg-'+panel.type: type ? 'bg-'+type : '')" [class.active]="panel.isOpen">
           <a href (click)="!!toggle(panel.id)" [class.text-muted]="panel.disabled" [attr.tabindex]="(panel.disabled ? '-1' : null)"
             [attr.aria-expanded]="panel.isOpen" [attr.aria-controls]="(panel.isOpen ? panel.id : null)"
             [attr.aria-disabled]="panel.disabled">
             {{panel.title}}<ng-template [ngTemplateOutlet]="panel.titleTpl?.templateRef"></ng-template>
           </a>
         </div>
-        <div id="{{panel.id}}" role="tabpanel" [attr.aria-labelledby]="panel.id + '-header'" 
-             class="card-body {{panel.isOpen ? 'show' : null}}" *ngIf="!destroyOnHide || panel.isOpen">
-             <ng-template [ngTemplateOutlet]="panel.contentTpl.templateRef"></ng-template>
+        <div id="{{panel.id}}" role="tabpanel" [attr.aria-labelledby]="panel.id + '-header'"
+             class="card-body collapse {{panel.isOpen ? 'show' : null}}" *ngIf="!destroyOnHide || panel.isOpen">
+             <ng-template [ngTemplateOutlet]="panel.contentTpl?.templateRef"></ng-template>
         </div>
       </div>
     </ng-template>
@@ -138,7 +150,8 @@ export class NgbAccordion implements AfterContentChecked {
 
   /**
    *  Accordion's types of panels to be applied globally.
-   *  Bootstrap 4 recognizes the following types: "success", "info", "warning" and "danger".
+   *  Bootstrap recognizes the following types: "primary", "secondary", "success", "danger", "warning", "info", "light"
+   * and "dark
    */
   @Input() type: string;
 

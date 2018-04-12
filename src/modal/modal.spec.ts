@@ -493,9 +493,9 @@ describe('ngb-modal', () => {
 
   });
 
-  describe('custom class options', () => {
+  describe('window custom class options', () => {
 
-    it('should render modals with the correct custom classes', async(() => {
+    it('should render modals with the correct window custom classes', async(() => {
          const modalInstance = fixture.componentInstance.open('foo', {windowClass: 'bar'});
          fixture.detectChanges();
          expect(fixture.nativeElement).toHaveModal('foo');
@@ -505,6 +505,21 @@ describe('ngb-modal', () => {
          fixture.detectChanges();
          expect(fixture.nativeElement).not.toHaveModal();
        }));
+
+  });
+
+  describe('backdrop custom class options', () => {
+
+    it('should render modals with the correct backdrop custom classes', () => {
+      const modalInstance = fixture.componentInstance.open('foo', {backdropClass: 'my-fancy-backdrop'});
+      fixture.detectChanges();
+      expect(fixture.nativeElement).toHaveModal('foo');
+      expect(document.querySelector('ngb-modal-backdrop')).toHaveCssClass('my-fancy-backdrop');
+
+      modalInstance.close();
+      fixture.detectChanges();
+      expect(fixture.nativeElement).not.toHaveModal();
+    });
 
   });
 
@@ -602,6 +617,21 @@ describe('ngb-modal', () => {
          modalInstance1.close();
          fixture.detectChanges();
        }));
+  });
+
+  describe('vertically centered', () => {
+
+    it('should render modals vertically centered', () => {
+      const modalInstance = fixture.componentInstance.open('foo', {centered: true});
+      fixture.detectChanges();
+      expect(fixture.nativeElement).toHaveModal('foo');
+      expect(document.querySelector('.modal-dialog')).toHaveCssClass('modal-dialog-centered');
+
+      modalInstance.close();
+      fixture.detectChanges();
+      expect(fixture.nativeElement).not.toHaveModal();
+    });
+
   });
 });
 

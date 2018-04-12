@@ -149,43 +149,51 @@ describe('ngb-popover', () => {
 
          directive.triggerEventHandler('click', {});
          fixture.detectChanges();
-         flush();
          expect(getWindow(fixture.nativeElement)).toBeNull();
          expect(spyService.called).toBeTruthy();
        }));
 
-    it('should allow re-opening previously closed popovers', fakeAsync(() => {
-         const fixture = createTestComponent(`<div ngbPopover="Great tip!" popoverTitle="Title"></div>`);
-         const directive = fixture.debugElement.query(By.directive(NgbPopover));
+    it('should not open a popover if [disablePopover] flag', () => {
+      const fixture = createTestComponent(`<div [ngbPopover]="Disabled!" [disablePopover]="true"></div>`);
+      const directive = fixture.debugElement.query(By.directive(NgbPopover));
 
-         directive.triggerEventHandler('click', {});
-         fixture.detectChanges();
-         expect(getWindow(fixture.nativeElement)).not.toBeNull();
+      directive.triggerEventHandler('click', {});
+      fixture.detectChanges();
+      const windowEl = getWindow(fixture.nativeElement);
 
-         directive.triggerEventHandler('click', {});
-         fixture.detectChanges();
-         flush();
-         expect(getWindow(fixture.nativeElement)).toBeNull();
+      expect(windowEl).toBeNull();
+    });
 
-         directive.triggerEventHandler('click', {});
-         fixture.detectChanges();
-         expect(getWindow(fixture.nativeElement)).not.toBeNull();
-       }));
+    it('should allow re-opening previously closed popovers', () => {
+      const fixture = createTestComponent(`<div ngbPopover="Great tip!" popoverTitle="Title"></div>`);
+      const directive = fixture.debugElement.query(By.directive(NgbPopover));
 
-    it('should not leave dangling popovers in the DOM', fakeAsync(() => {
-         const fixture = createTestComponent(
-             `<ng-template [ngIf]="show"><div ngbPopover="Great tip!" popoverTitle="Title"></div></ng-template>`);
-         const directive = fixture.debugElement.query(By.directive(NgbPopover));
+      directive.triggerEventHandler('click', {});
+      fixture.detectChanges();
+      expect(getWindow(fixture.nativeElement)).not.toBeNull();
 
-         directive.triggerEventHandler('click', {});
-         fixture.detectChanges();
-         expect(getWindow(fixture.nativeElement)).not.toBeNull();
+      directive.triggerEventHandler('click', {});
+      fixture.detectChanges();
+      expect(getWindow(fixture.nativeElement)).toBeNull();
 
-         fixture.componentInstance.show = false;
-         fixture.detectChanges();
-         flush();
-         expect(getWindow(fixture.nativeElement)).toBeNull();
-       }));
+      directive.triggerEventHandler('click', {});
+      fixture.detectChanges();
+      expect(getWindow(fixture.nativeElement)).not.toBeNull();
+    });
+
+    it('should not leave dangling popovers in the DOM', () => {
+      const fixture = createTestComponent(
+          `<ng-template [ngIf]="show"><div ngbPopover="Great tip!" popoverTitle="Title"></div></ng-template>`);
+      const directive = fixture.debugElement.query(By.directive(NgbPopover));
+
+      directive.triggerEventHandler('click', {});
+      fixture.detectChanges();
+      expect(getWindow(fixture.nativeElement)).not.toBeNull();
+
+      fixture.componentInstance.show = false;
+      fixture.detectChanges();
+      expect(getWindow(fixture.nativeElement)).toBeNull();
+    });
 
     it('should properly cleanup popovers with manual triggers', fakeAsync(() => {
          const fixture = createTestComponent(`<ng-template [ngIf]="show">

@@ -1,8 +1,10 @@
+import {DOCUMENT} from '@angular/common';
 import {
   Component,
   Output,
   EventEmitter,
   Input,
+  Inject,
   ElementRef,
   Renderer2,
   OnInit,
@@ -18,19 +20,18 @@ import {AnimationsHelper} from '../util/animations-helper';
 @Component({
   selector: 'ngb-modal-window',
   host: {
-    '[class]': '"modal fade show" + (windowClass ? " " + windowClass : "")',
+    '[class]': '"modal fade show d-block" + (windowClass ? " " + windowClass : "")',
     'role': 'dialog',
     'tabindex': '-1',
-    'style': 'display: block;',
     '(keyup.esc)': 'escKey($event)',
     '(click)': 'backdropClick($event)',
     '[@modalBackdrop]': 'animationsHelper.state',
     '(@modalBackdrop.done)': 'animationsHelper.stateChanges.next($event)'
   },
-  template: `
+  template: `    
     <div
       [@modalWindow]="animationsHelper.state"
-      [class]="'modal-dialog' + (size ? ' modal-' + size : '')" 
+      [class]="'modal-dialog' + (size ? ' modal-' + size : '') + (centered ? ' modal-dialog-centered' : '')"
       role="document">
         <div class="modal-content"><ng-content></ng-content></div>
     </div>
@@ -59,9 +60,11 @@ import {AnimationsHelper} from '../util/animations-helper';
 })
 export class NgbModalWindow implements OnInit,
     AfterViewInit, OnDestroy {
+  private _document: any;
   private _elWithFocus: Element;  // element that is focused prior to modal opening
 
   @Input() backdrop: boolean | string = true;
+  @Input() centered: string;
   @Input() keyboard = true;
   @Input() size: string;
   @Input() windowClass: string;
@@ -70,7 +73,9 @@ export class NgbModalWindow implements OnInit,
 
   animationsHelper = new AnimationsHelper();
 
-  constructor(private _elRef: ElementRef, private _renderer: Renderer2) {}
+  constructor(@Inject(DOCUMENT) document, private _elRef: ElementRef, private _renderer: Renderer2) {
+    this._document = document;
+  }
 
   backdropClick($event): void {
     if (this.backdrop === true && this._elRef.nativeElement === $event.target) {
@@ -87,8 +92,8 @@ export class NgbModalWindow implements OnInit,
   dismiss(reason): void { this.dismissEvent.emit(reason); }
 
   ngOnInit() {
-    this._elWithFocus = document.activeElement;
-    this._renderer.addClass(document.body, 'modal-open');
+    this._elWithFocus = this._document.activeElement;
+    this._renderer.addClass(this._document.body, 'modal-open');
   }
 
   ngAfterViewInit() {
@@ -98,7 +103,7 @@ export class NgbModalWindow implements OnInit,
   }
 
   ngOnDestroy() {
-    const body = document.body;
+    const body = this._document.body;
     const elWithFocus = this._elWithFocus;
 
     let elementToFocus;
